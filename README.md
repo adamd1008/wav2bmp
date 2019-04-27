@@ -89,7 +89,7 @@ As stated in the script output, `wav2bmp.py` has written two files:
 1. `square_2.wav_fs10000_s1024_o0.5_ab_db.bmp`
 2. `square_2.wav_fs10000_s1024_o0.5_ab_db.npy`
 
-W2B writes images with several pieces of information encoded into the name:
+Ignore the `.npy` file for now. W2B writes images with several pieces of information encoded into the name:
 
 - Source WAV name
 - Sample rate ("fs10000", i.e. 10 kHz)
