@@ -20,15 +20,15 @@ python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy
 
 Note: you may need to use the command `python3` in place of `python`, depending on your platform. If in doubt, to find the version you are using, use command `python --version`.
 
-### Clone this repository
+### Clone/download the code
 
-From the command-line:
+To clone, run from the command-line:
 
 ```
 git clone https://github.com/adamd1008/wav2bmp.git
 ```
 
-It's best to clone the repository to a hard disk drive. More details on that below.
+It's best to put the repository on a hard disk drive. More details on that below.
 
 ### (Optional) Install an image editor
 
