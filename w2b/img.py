@@ -25,6 +25,7 @@ import numpy as np
 
 from . import util
 
+
 ################################################################################
 def write_abs(name, fs, size, overlapDec, ab, inv=False):
     baseName = name + "_fs" + str(fs) + "_s" + str(size) + \

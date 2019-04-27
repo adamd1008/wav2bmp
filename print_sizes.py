@@ -50,7 +50,6 @@ conjunction with high overlaps, may take a long time and require a *huge* \
 amount of memory.""")
 
 
-
 ################################################################################
 if __name__ == "__main__":
     main()

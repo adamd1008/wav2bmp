@@ -24,6 +24,8 @@ import scipy.io.wavfile as wavfile
 
 from . import util
 
+
+################################################################################
 def read(fileName):
     fs, wav = wavfile.read(fileName)
     length = wav.shape[0]
@@ -34,6 +36,8 @@ def read(fileName):
 
     return fs, wavNorm, length
 
+
+################################################################################
 def write(fileName, fs, wav):
     print("Writing WAV: \"" + fileName + "\" (fs = " + str(fs) + \
             ", len = " + str(wav.shape[0]) + ")")
