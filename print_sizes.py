@@ -22,54 +22,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
-
-import imageio as iio
-import matplotlib.pyplot as plt
 import numpy as np
-
-import w2b.fft as fft
-import w2b.plot as plot
-import w2b.img as img
-import w2b.wav as wav
 
 
 ################################################################################
-def main(name, size, overlapDec):
-    fs, s, l = wav.read(name)
+def main():
+    n = 8
 
-    if s.ndim == 2:
-        s0 = s[:, 0]
-    else:
-        s0 = s
+    while n <= 16:
+        x = int(np.power(2.0, n))
+        print("n = " + str(n) + "\tsize = " + str(x))
+        n += 1
 
-    print("Computing FFT data...")
-    ab, an, x = fft.wav2bmp(fs, s0, size, overlapDec)
+    print("""
+FFT size is a tradeoff between the frequency resolution and the \
+time resolution (when they are appended and combined into a spectrogram). If \
+you pick a high size (>4096) you will notice that one column of the \
+spectrogram represents enough time that transients (sounds with a drastic \
+change in frequency in a short time) may be too hard to see, and so modifying \
+them is not possible.
 
-    print("Drawing graphs...")
-    #fig = plt.figure()
-    #plt.plot(np.arange(0, s0.size), s0)
-    #plt.show(block=False)
+For typical audio data, I prefer 1024, 2048 or 4096. But, by all means, \
+experiment!
 
-    #plot.draw_abs(name, fs, size, overlapDec, ab)
-    plot.draw_abs_db(name, fs, size, overlapDec, ab)
-    #plot.draw_abs_db_log(name, fs, size, overlapDec, ab)
-    #plot.draw_ang(name, fs, size, overlapDec, an)
+W2B supports all FFT sizes, I think. But beware that large sizes, in \
+conjunction with high overlaps, may take a long time and require a *huge* \
+amount of memory.""")
 
-    print("Writing images...")
-    #img.write_abs(name, fs, size, overlapDec, ab)
-    img.write_abs_db(name, fs, size, overlapDec, ab)
-    #img.write_abs_db_log(name, fs, size, overlapDec, ab)
-    #img.write_ang(name, fs, size, overlapDec, an)
-
-    plt.show()
 
 
 ################################################################################
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        main(sys.argv[1], int(sys.argv[2]), float(sys.argv[3]))
-    else:
-        print("Usage: " + sys.argv[0] +
-                " <WAV file> <size> <overlap>")
-        sys.exit(1)
+    main()

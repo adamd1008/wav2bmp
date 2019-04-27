@@ -22,54 +22,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
-
-import imageio as iio
-import matplotlib.pyplot as plt
 import numpy as np
-
-import w2b.fft as fft
-import w2b.plot as plot
-import w2b.img as img
-import w2b.wav as wav
 
 
 ################################################################################
-def main(name, size, overlapDec):
-    fs, s, l = wav.read(name)
+def main():
+    n = 0
 
-    if s.ndim == 2:
-        s0 = s[:, 0]
-    else:
-        s0 = s
+    while n <= 12:
+        x = np.power(2.0, n)
+        print("n = " + str(n) + "\toverlapDec = " + str(1.0 - (1.0 / x)))
+        n += 1
 
-    print("Computing FFT data...")
-    ab, an, x = fft.wav2bmp(fs, s0, size, overlapDec)
+    print("""
+Overlap is useful when using bigger FFT sizes. Generally speaking, using a \
+higher overlap makes higher FFT sizes clearer. Here are the best combinations \
+of size and overlap that I personally find clearest:
 
-    print("Drawing graphs...")
-    #fig = plt.figure()
-    #plt.plot(np.arange(0, s0.size), s0)
-    #plt.show(block=False)
+FFT size | Suitable overlaps
+---------|---------------------------------
+     256 | 0.5
+     512 | 0.5, 0.75
+    1024 | 0.5, 0.75, 0.875
+    2048 | 0.75, 0.875
+    4096 | 0.875, 0.9375
 
-    #plot.draw_abs(name, fs, size, overlapDec, ab)
-    plot.draw_abs_db(name, fs, size, overlapDec, ab)
-    #plot.draw_abs_db_log(name, fs, size, overlapDec, ab)
-    #plot.draw_ang(name, fs, size, overlapDec, an)
+I find that, for audio, sizes 8192 and up are basically useless regardless of \
+the chosen overlap.
 
-    print("Writing images...")
-    #img.write_abs(name, fs, size, overlapDec, ab)
-    img.write_abs_db(name, fs, size, overlapDec, ab)
-    #img.write_abs_db_log(name, fs, size, overlapDec, ab)
-    #img.write_ang(name, fs, size, overlapDec, an)
-
-    plt.show()
+Warning: each overlap requires much more time and space than the previous one! \
+I wouldn't recommend venturing further than 0.96875 if you have 16 GB or \
+less memory.""")
 
 
 ################################################################################
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        main(sys.argv[1], int(sys.argv[2]), float(sys.argv[3]))
-    else:
-        print("Usage: " + sys.argv[0] +
-                " <WAV file> <size> <overlap>")
-        sys.exit(1)
+    main()
