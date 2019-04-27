@@ -153,7 +153,7 @@ And we're done. The two resynthesized WAVs are:
 
 The script also generates a "bmp_in" WAV for easy comparison. This is useful if the source WAV has multiple channels, in which case the "bmp_in" WAV only includes the first channel (which the `wav2bmp.py` script works on).
 
-## Useful tools to check out first
+## Useful tools to check out
 
 I have provided the tools `print_sizes.py` and `print_overlaps.py` which will help in choosing a suitable size and overlap when analysing a WAV.
 
