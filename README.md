@@ -40,10 +40,6 @@ One WAV, `square_2.wav`, is included as part of this repository. It is a 500 Hz 
 
 The tools in this repository operate on WAV files that you have on your system. When image files are generated, they will be written to the same directory as the source WAV file. **If you have an SSD**, beware that using large FFT sizes with big overlaps can result in large files being written to disk. I would recommend using this tool on a hard disk drive and, to be sure, copy any WAVs to the repository directory and use them from there.
 
-## Useful tools to check out first
-
-I have provided the tools `print_sizes.py` and `print_overlaps.py` which will help in choosing a suitable size and overlap when analysing a WAV.
-
 ## Quick start #1: my first analysis!
 
 Navigate to the `wav2bmp` directory in a command-line terminal. In this example I am using the Command Prompt on Windows. Adjust paths where appropriate, according to where you cloned this repository.
@@ -156,6 +152,10 @@ And we're done. The two resynthesized WAVs are:
 - `square_2.wav_fs10000_s1024_o0.5_ab_db_mask2.bmp_out.wav`
 
 The script also generates a "bmp_in" WAV for easy comparison. This is useful if the source WAV has multiple channels, in which case the "bmp_in" WAV only includes the first channel (which the `wav2bmp.py` script works on).
+
+## Useful tools to check out first
+
+I have provided the tools `print_sizes.py` and `print_overlaps.py` which will help in choosing a suitable size and overlap when analysing a WAV.
 
 ## Known issues
 
