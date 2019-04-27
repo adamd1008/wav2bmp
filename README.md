@@ -20,15 +20,15 @@ python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy
 
 Note: you may need to use the command `python3` in place of `python`, depending on your platform. If in doubt, to find the version you are using, use command `python --version`.
 
-### Clone this repository
+### Clone/download the code
 
-From the command-line:
+To clone, run from the command-line:
 
 ```
 git clone https://github.com/adamd1008/wav2bmp.git
 ```
 
-It's best to clone the repository to a hard disk drive. More details on that below.
+It's best to put the repository on a hard disk drive. More details on that below.
 
 ### (Optional) Install an image editor
 
@@ -50,8 +50,6 @@ Navigate to the `wav2bmp` directory in a command-line terminal. In this example 
 
 ```
 C:\Users\Adam>cd /d D:\Work\wav2bmp
-
-D:\Work\wav2bmp>
 ```
 
 In this first example we will be using the included WAV called `square_2.wav`.
@@ -61,8 +59,6 @@ The script that will generate our BMPs is called `wav2bmp.py`. To see how we sho
 ```
 C:\wav2bmp>python wav2bmp.py
 Usage: wav2bmp.py <WAV file> <size> <overlap>
-
-C:\wav2bmp>
 ```
 
 I've already decided that the most suitable size and overlap values (in my opinion) are `1024` and `0.5`, respectively. Let's run them on the WAV:
@@ -111,7 +107,7 @@ Before exporting, click the eye icon in the layers widget to hide the spectrogra
 
 Now I show the spectrogram layer again and undo changes to get back to a blank layer. Repeat the above process to draw over the higher harmonic, and export again in the usual way (in my case, with "\_mask2" in the name).
 
-I have included example masks that I made i nthis repository.
+I have included example masks that I made in this repository.
 
 Now we will run the script twice to resynthesize the square wave with each harmonic removed. For the first mask:
 
