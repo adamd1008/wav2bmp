@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
-from numpy.fft import irfft, rfftfreq
+from numpy.fft import rfftfreq
 
 
 ################################################################################

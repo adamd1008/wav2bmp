@@ -27,14 +27,14 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-import w2b.fft as fft
+import w2b.fft_ocl as fft_ocl
 import w2b.img as img
 import w2b.plot as plot
 import w2b.wav as wav
 
 
 ################################################################################
-def main(name, size, overlapDec):
+def main(name, size, bins, startFreq, endFreq, overlapDec):
     fs, s, l = wav.read(name)
 
     if s.ndim == 2:
@@ -43,23 +43,23 @@ def main(name, size, overlapDec):
         s0 = s
 
     print("Computing FFT data...")
-    ab, an, x = fft.wav2bmp(fs, s0, size, overlapDec)
+    ab, an = fft_ocl.wav2bmp_ocl(
+            fs, s0, size, bins, startFreq, endFreq, overlapDec)
 
     print("Drawing graphs...")
     fig = plt.figure()
     plt.plot(np.arange(0, s0.size), s0)
     plt.show(block=False)
 
-    plot.draw_abs(name, fs, size, overlapDec, ab)
-    plot.draw_abs_db(name, fs, size, overlapDec, ab)
-    #plot.draw_abs_db_log(name, fs, size, overlapDec, ab)
-    plot.draw_ang(name, fs, size, overlapDec, an)
+    plot.draw_abs(name, fs, size, overlapDec, ab, block=False)
+    plot.draw_abs_db(name, fs, size, overlapDec, ab, block=False)
+    plot.draw_ang(name, fs, size, overlapDec, an, block=False)
 
     print("Writing images...")
-    img.write_abs(name, fs, size, overlapDec, ab)
-    img.write_abs_db(name, fs, size, overlapDec, ab)
-    #img.write_abs_db_log(name, fs, size, overlapDec, ab)
-    img.write_ang(name, fs, size, overlapDec, an)
+    img.write_abs_ocl(name, fs, size, bins, startFreq, endFreq, overlapDec, ab)
+    img.write_abs_db_ocl(name, fs, size, bins, startFreq, endFreq,
+            overlapDec, ab)
+    img.write_ang_ocl(name, fs, size, bins, startFreq, endFreq, overlapDec, an)
 
     print("Done")
     plt.show()
@@ -67,9 +67,10 @@ def main(name, size, overlapDec):
 
 ################################################################################
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        main(sys.argv[1], int(sys.argv[2]), float(sys.argv[3]))
+    if len(sys.argv) == 7:
+        main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]),
+                float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]))
     else:
         print("Usage: " + sys.argv[0] +
-                " <WAV file> <size> <overlap>")
+                " <WAV file> <size> <bins> <startFreq> <endFreq> <overlap>")
         sys.exit(1)
