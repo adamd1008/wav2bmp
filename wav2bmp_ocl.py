@@ -27,7 +27,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-import w2b.fft_ocl as fft_ocl
+import w2b.ft_ocl as ft_ocl
 import w2b.img as img
 import w2b.plot as plot
 import w2b.wav as wav
@@ -43,7 +43,7 @@ def main(name, size, bins, startFreq, endFreq, overlapDec):
         s0 = s
 
     print("Computing FFT data...")
-    ab, an = fft_ocl.wav2bmp_ocl(
+    ab, an = ft_ocl.wav2bmp_ocl(
             fs, s0, size, bins, startFreq, endFreq, overlapDec)
 
     print("Drawing graphs...")

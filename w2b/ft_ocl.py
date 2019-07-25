@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os.path
 import sys
 import types
 
@@ -29,83 +30,6 @@ from pyopencl import mem_flags as mf
 
 from . import fft
 from . import wav
-
-
-################################################################################
-slowft = """
-float complexAbs(const float re, const float im)
-{
-    return sqrt(pow(re, 2.0f) + pow(im, 2.0f));
-}
-
-float complexAngAtan2(const float re, const float im)
-{
-    const float pi2 = 2.0f * M_PI_F;
-    float ret = atan2(im, re);
-
-    if (ret < 0.0f)
-        ret += pi2;
-
-    return ret;
-}
-
-// Chinese hat smoothing for angle (for  A E S T H E T I C  purposes only!)
-float complexAngAtan2CHat(const float re, const float im)
-{
-    const float pi2 = M_PI_F * 2.0f;
-    const float cAng = complexAngAtan2(re, im) * 2.0f;
-    float ret = cAng;
-
-    if (cAng > pi2)
-    {
-        ret = pi2 - (cAng - pi2);
-    }
-
-    return ret;
-}
-
-__kernel void slowft(
-        const uint fs,
-        __global const float samp[],
-        const uint size,
-        const uint bins,
-        const uint iters,
-        __global const float freqs[],
-        const uint freqCount,
-        __global float abs[],
-        __global float ang[])
-{
-    const float pi2 = 2.0f * M_PI_F;
-    uint iter = get_global_id(0);
-    uint bin = get_global_id(1);
-
-    uint binIdx = (bin * iters) + iter;
-    float fps = (pi2 * freqs[bin]) / ((float) fs);
-    float re = 0.0f;
-    float im = 0.0f;
-
-    for (uint n = 0; n < size; n++)
-    {
-        uint sampIdx = (n * iters) + iter;
-        float fpsn = fps * ((float) n);
-
-        re += samp[sampIdx] * cos(fpsn);
-        im -= samp[sampIdx] * sin(fpsn);
-    }
-
-    re /= ((float) size);
-    im /= ((float) size);
-
-    float thisAbs = complexAbs(re, im);
-
-    //float thisAng = atan2(im, re) + M_PI_F;
-    float thisAng = complexAngAtan2(re, im);
-    //float thisAng = complexAngAtan2CHat(re, im);
-
-    abs[binIdx] = thisAbs;
-    ang[binIdx] = thisAng;
-}
-"""
 
 
 ################################################################################
@@ -135,10 +59,42 @@ def wav2bmp_ocl(fs, wav, size, bins, startFreq, endFreq,
     start, n, step, iters = fft.get_fft_stats(len(wav), size, overlapDec)
 
     platforms = cl.get_platforms()
+
+    if len(platforms) > 1:
+        p = -1
+
+        for i in range(0, len(platforms)):
+            if "NVIDIA" in platforms[i].vendor:
+                p = i
+                break
+
+        if p == -1:
+            for i in range(0, len(platforms)):
+                if "AMD" in platforms[i].vendor:
+                    p = i
+                    break
+
+        if p == -1:
+            print("Unable to intelligently choose a platform; " +
+                "defaulting to platform [0]")
+            p = 0
+    elif len(platforms) == 1:
+        p = 0
+    else:
+        raise RuntimeError("No OpenCL platforms found")
+
+    print(("\nSelected OpenCL platform [{}]\n" +
+        "> name: \"{}\"\n" +
+        "> version: \"{}\"\n").format(
+            p, platforms[p].name, platforms[p].version))
+
     ctx = cl.Context(
             dev_type=cl.device_type.ALL,
-            properties=[(cl.context_properties.PLATFORM, platforms[1])])
-    prog = cl.Program(ctx, slowft).build()
+            properties=[(cl.context_properties.PLATFORM, platforms[p])])
+    prog = cl.Program(
+            ctx, open(os.path.join(
+                os.path.dirname(sys.argv[0]), "w2b", "ft_kernel.cl")) \
+                        .read()).build()
 
     print("bins:", bins)
     print("iters:", iters)
