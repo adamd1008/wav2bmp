@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 
+from . import colourmap as cm
 from . import util
 
 
@@ -78,14 +78,56 @@ def draw_abs_db_log(name, fs, size, overlapDec, ab, inv=False, block=False):
 
 
 ################################################################################
-def draw_ang(name, fs, size, overlapDec, an, block=False):
-    an_norm = an / (2 * np.pi)
+def draw_ang(name, fs, size, overlapDec, ab, an,
+        bins=None, startFreq=None, endFreq=None,
+        colourMap=cm.colour_maps["thermal1"], normAbs=True, block=False):
+    """Draw the FFT phase information scaled by amplitude"""
 
-    assert np.amin(an_norm) >= 0.0
-    assert np.amax(an_norm) <= 1.0
+    if normAbs:
+        abNorm = util.norm(ab)
+    else:
+        abNorm = ab
+
+    anNorm = an / (2 * np.pi)
+
+    if (bins == None) or (startFreq == None) or (endFreq == None):
+        binFreqs, logFreqs = util.log_freq(fs, size)
+
+        if bins == None:
+            bins = len(binFreqs)
+
+        if startFreq == None:
+            startFreq = binFreqs[0]
+
+        if endFreq == None:
+            endFreq = binFreqs[-1]
+
+    assert np.amin(abNorm) >= 0.0
+    assert np.amax(abNorm) <= 1.0
+    assert np.amin(anNorm) >= 0.0
+    assert np.amax(anNorm) <= 1.0
+
+    img = np.ndarray((abNorm.shape[0], abNorm.shape[1], 3), dtype="float32")
+
+    img[:, :, 0] = abNorm[:, :] * \
+            np.interp(anNorm[:, :], colourMap["r"]["x"], colourMap["r"]["y"])
+    img[:, :, 1] = abNorm[:, :] * \
+            np.interp(anNorm[:, :], colourMap["g"]["x"], colourMap["g"]["y"])
+    img[:, :, 2] = abNorm[:, :] * \
+            np.interp(anNorm[:, :], colourMap["b"]["x"], colourMap["b"]["y"])
+
+    assert np.amin(img) >= 0.0
+    assert np.amax(img) <= 1.0
+
+    graphName = "ang [" + name + "]\nfs = " + str(fs) + \
+            ", size = " + str(size) + ", bins = " + str(bins) + \
+            ", startFreq = " + str(startFreq) + \
+            ", endFreq = " + str(endFreq) + ", ovl = " + str(overlapDec)
+
+    if normAbs:
+        graphName += " (ab norm)"
 
     fig = plt.figure()
-    fig.suptitle("ang [" + name + "]\nfs = " + str(fs) + \
-            ", size = " + str(size) + ", ovl = " + str(overlapDec))
-    plt.imshow(an_norm, cmap="gray", origin="lower")
+    fig.suptitle(graphName)
+    plt.imshow(img, origin="lower")
     plt.show(block=block)

@@ -53,13 +53,15 @@ def main(name, size, bins, startFreq, endFreq, overlapDec):
 
     plot.draw_abs(name, fs, size, overlapDec, ab, block=False)
     plot.draw_abs_db(name, fs, size, overlapDec, ab, block=False)
-    plot.draw_ang(name, fs, size, overlapDec, an, block=False)
+    plot.draw_ang(name, fs, size, overlapDec, ab, an,
+            bins=bins, startFreq=startFreq, endFreq=endFreq, block=False)
 
     print("Writing images...")
     img.write_abs_ocl(name, fs, size, bins, startFreq, endFreq, overlapDec, ab)
     img.write_abs_db_ocl(name, fs, size, bins, startFreq, endFreq,
             overlapDec, ab)
-    img.write_ang_ocl(name, fs, size, bins, startFreq, endFreq, overlapDec, an)
+    img.write_ang(name, fs, size, overlapDec, ab, an,
+            bins=bins, startFreq=startFreq, endFreq=endFreq)
 
     print("Done")
     plt.show()

@@ -53,13 +53,13 @@ def main(name, size, overlapDec):
     plot.draw_abs(name, fs, size, overlapDec, ab)
     plot.draw_abs_db(name, fs, size, overlapDec, ab)
     #plot.draw_abs_db_log(name, fs, size, overlapDec, ab)
-    plot.draw_ang(name, fs, size, overlapDec, an)
+    plot.draw_ang(name, fs, size, overlapDec, ab, an)
 
     print("Writing images...")
     img.write_abs(name, fs, size, overlapDec, ab)
     img.write_abs_db(name, fs, size, overlapDec, ab)
     #img.write_abs_db_log(name, fs, size, overlapDec, ab)
-    img.write_ang(name, fs, size, overlapDec, an)
+    img.write_ang(name, fs, size, overlapDec, ab, an)
 
     print("Done")
     plt.show()

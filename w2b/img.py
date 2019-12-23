@@ -23,6 +23,7 @@
 import imageio as iio
 import numpy as np
 
+from . import colourmap as cm
 from . import util
 
 
@@ -130,37 +131,59 @@ def write_abs_db_log(name, fs, size, overlapDec, ab, inv=False):
 
 
 ################################################################################
-def write_ang(name, fs, size, overlapDec, an):
-    an_norm = an / (2 * np.pi)
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + \
-            "_o" + str(overlapDec) + "_an"
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
+def write_ang(name, fs, size, overlapDec, ab, an,
+        bins=None, startFreq=None, endFreq=None,
+        colourMap=cm.colour_maps["thermal1"], normAbs=True):
+    """Write the FFT phase information scaled by amplitude"""
 
-    assert np.amin(an_norm) >= 0.0
-    assert np.amax(an_norm) <= 1.0
+    if normAbs:
+        abNorm = util.norm(ab)
+    else:
+        abNorm = ab
 
-    print("Writing image file \"" + imgName + "\"")
-    iio.imwrite(imgName, np.flipud(an_norm))
+    anNorm = an / (2 * np.pi)
 
-    print("Writing raw file \"" + rawName + "\"")
-    np.save(rawName, an_norm)
+    if (bins == None) or (startFreq == None) or (endFreq == None):
+        binFreqs, logFreqs = util.log_freq(fs, size)
 
+        if bins == None:
+            bins = len(binFreqs)
 
-################################################################################
-def write_ang_ocl(name, fs, size, bins, startFreq, endFreq, overlapDec, an):
-    an_norm = an / (2 * np.pi)
+        if startFreq == None:
+            startFreq = binFreqs[0]
+
+        if endFreq == None:
+            endFreq = binFreqs[-1]
+
     baseName = name + "_fs" + str(fs) + "_s" + str(size) + "_b" + str(bins) + \
             "_sf" + str(startFreq) + "_ef" + str(endFreq) + \
             "_o" + str(overlapDec) + "_an"
+
+    if normAbs:
+        baseName += "_norm"
+
     imgName = baseName + ".bmp"
     rawName = baseName + ".npy"
 
-    assert np.amin(an_norm) >= 0.0
-    assert np.amax(an_norm) <= 1.0
+    assert np.amin(abNorm) >= 0.0
+    assert np.amax(abNorm) <= 1.0
+    assert np.amin(anNorm) >= 0.0
+    assert np.amax(anNorm) <= 1.0
+
+    img = np.ndarray((abNorm.shape[0], abNorm.shape[1], 3), dtype="float32")
+
+    img[:, :, 0] = abNorm[:, :] * \
+            np.interp(anNorm[:, :], colourMap["r"]["x"], colourMap["r"]["y"])
+    img[:, :, 1] = abNorm[:, :] * \
+            np.interp(anNorm[:, :], colourMap["g"]["x"], colourMap["g"]["y"])
+    img[:, :, 2] = abNorm[:, :] * \
+            np.interp(anNorm[:, :], colourMap["b"]["x"], colourMap["b"]["y"])
+
+    assert np.amin(img) >= 0.0
+    assert np.amax(img) <= 1.0
 
     print("Writing image file \"" + imgName + "\"")
-    iio.imwrite(imgName, np.flipud(an_norm))
+    iio.imwrite(imgName, np.flipud(img))
 
     print("Writing raw file \"" + rawName + "\"")
-    np.save(rawName, an_norm)
+    np.save(rawName, img)
