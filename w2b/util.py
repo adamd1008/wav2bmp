@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2019 Adam Dodd
+# Copyright (c) 2020 Adam Dodd
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -118,8 +118,11 @@ def angle(x):
     The NumPy `angle()` function returns negative angles when there is a -ve
     imaginary component; I want 0 to 2pi when rotating all the way round
     anti-clockwise from 1+0j.
+
+    Normalises return values (0 <= ret < 1).
     """
 
+    pi2 = (2.0 * np.pi)
     ang = np.angle(x)
 
     if type(ang) == np.ndarray:
@@ -129,16 +132,16 @@ def angle(x):
         if ang.ndim == 1:
             for i in range(0, ang.shape[0]):
                 if ang[i] < 0.0:
-                    ang[i] = ang[i] + (2.0 * np.pi)
+                    ang[i] = ang[i] + pi2
         elif ang.ndim == 2:
             for i in range(0, ang.shape[0]):
                 for j in range(0, ang.shape[1]):
                     if ang[i, j] < 0.0:
-                        ang[i, j] = ang[i, j] + (2.0 * np.pi)
+                        ang[i, j] = ang[i, j] + pi2
         else:
             raise ValueError("Expected 1 <= ndim <= 2")
     else:
         if ang < 0.0:
-            ang = ang + (2.0 * np.pi)
+            ang = ang + pi2
 
-    return ang
+    return ang / pi2

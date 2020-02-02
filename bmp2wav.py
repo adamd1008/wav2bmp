@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2019 Adam Dodd
+# Copyright (c) 2020 Adam Dodd
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,7 @@ import w2b.wav as wav
 def main(wavName, maskName, size, overlapDec):
     fs, s, l = wav.read(wavName)
 
+    # If stereo, take left channel
     if s.ndim == 2:
         s0 = s[:, 0]
     else:

@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2019 Adam Dodd
+# Copyright (c) 2020 Adam Dodd
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -88,8 +88,6 @@ def draw_ang(name, fs, size, overlapDec, ab, an,
     else:
         abNorm = ab
 
-    anNorm = an / (2 * np.pi)
-
     if (bins == None) or (startFreq == None) or (endFreq == None):
         binFreqs, logFreqs = util.log_freq(fs, size)
 
@@ -104,17 +102,17 @@ def draw_ang(name, fs, size, overlapDec, ab, an,
 
     assert np.amin(abNorm) >= 0.0
     assert np.amax(abNorm) <= 1.0
-    assert np.amin(anNorm) >= 0.0
-    assert np.amax(anNorm) <= 1.0
+    assert np.amin(an) >= 0.0
+    assert np.amax(an) <  1.0
 
     img = np.ndarray((abNorm.shape[0], abNorm.shape[1], 3), dtype="float32")
 
     img[:, :, 0] = abNorm[:, :] * \
-            np.interp(anNorm[:, :], colourMap["r"]["x"], colourMap["r"]["y"])
+            np.interp(an[:, :], colourMap["r"]["x"], colourMap["r"]["y"])
     img[:, :, 1] = abNorm[:, :] * \
-            np.interp(anNorm[:, :], colourMap["g"]["x"], colourMap["g"]["y"])
+            np.interp(an[:, :], colourMap["g"]["x"], colourMap["g"]["y"])
     img[:, :, 2] = abNorm[:, :] * \
-            np.interp(anNorm[:, :], colourMap["b"]["x"], colourMap["b"]["y"])
+            np.interp(an[:, :], colourMap["b"]["x"], colourMap["b"]["y"])
 
     assert np.amin(img) >= 0.0
     assert np.amax(img) <= 1.0
