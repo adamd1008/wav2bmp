@@ -112,8 +112,8 @@ def lin2log(ab, binFreqs, logFreqs):
 
 ################################################################################
 def angle(x):
-    """A function that takes a complex `ndarray` and returns the FFT-friendly
-    angles.
+    """A function that takes a complex scalar or `ndarray` and returns the
+    FFT-friendly angles.
 
     The NumPy `angle()` function returns negative angles when there is a -ve
     imaginary component; I want 0 to 2pi when rotating all the way round
@@ -122,7 +122,7 @@ def angle(x):
     Normalises return values (0 <= ret < 1).
     """
 
-    pi2 = (2.0 * np.pi)
+    pi2 = 2.0 * np.pi
     ang = np.angle(x)
 
     if type(ang) == np.ndarray:
