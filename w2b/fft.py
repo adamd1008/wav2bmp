@@ -48,7 +48,7 @@ def get_fft_stats(n, size, overlapDec):
 
     sizeLog2 = np.log2(size)
 
-    if np.abs(sizeLog2) != sizeLog2:
+    if int(sizeLog2) != sizeLog2:
         raise ValueError("Size must be 2^n")
 
     sizeOverlap = size * overlapDec
@@ -108,7 +108,7 @@ def get_fft_stats(n, size, overlapDec):
     #print(str(count) + " iters: ", iterString)
     #print()
 
-    return start, n, step, iters
+    return start, step, iters
 
 
 ################################################################################
@@ -136,14 +136,14 @@ def wav2bmp(fs, wav, size=1024, overlapDec=0.0, window=np.hanning):
     else:
         raise ValueError("Expected `window' to be a function or NumPy array")
 
-    start, n, step, iters = get_fft_stats(l, size, overlapDec)
+    start, step, iters = get_fft_stats(l, size, overlapDec)
     c = 0
     ab = np.zeros((fftLen, iters), dtype="float32")
     an = np.zeros((fftLen, iters), dtype="float32")
     x = np.zeros((fftLen, iters), dtype=complex)
     buf = np.ndarray(size, dtype="float32")
 
-    for i in range(start, n, step):
+    for i in range(start, l, step):
         # Do stuff
 
         if i < 0:
@@ -156,14 +156,14 @@ def wav2bmp(fs, wav, size=1024, overlapDec=0.0, window=np.hanning):
 
             buf[0:bufStart] = 0.0
             buf[bufStart:bufEnd] = wav[0:wavEnd]
-        elif (i + size) >= n:
-            bufEnd = n - i
+        elif (i + size) >= l:
+            bufEnd = l - i
             wavStart = i
 
             #print("[>] i =", i, "\tbuf: 0 to", bufEnd, "to", size, \
-            #        "\twav:", wavStart, "to", n, "|", (n - wavStart))
+            #        "\twav:", wavStart, "to", l, "|", (l - wavStart))
 
-            buf[0:bufEnd] = wav[wavStart:n]
+            buf[0:bufEnd] = wav[wavStart:l]
             buf[bufEnd:size] = 0.0
         else:
             wavStart = i
@@ -212,7 +212,7 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
     assert x.dtype == complex
     assert mask.dtype == "float32"
 
-    start, n, step, iters = get_fft_stats(l, size, overlapDec)
+    start, step, iters = get_fft_stats(l, size, overlapDec)
     fftI = 0
     wavI = start
     out = np.zeros(l, dtype="float32")
@@ -224,8 +224,6 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
     print("multiple =", mult)
 
     while wavI < l:
-        assert wavI < n
-
         buf = irfft(x[:, fftI] * mask[:, fftI]) / mult
 
         if wavI < 0:
@@ -237,14 +235,14 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
             #        "\tbuf:", bufStart, "to", bufEnd, "|", wavEnd)
 
             out[0:wavEnd] += buf[bufStart:bufEnd]
-        elif (wavI + size) >= n:
-            bufEnd = n - wavI
+        elif (wavI + size) >= l:
+            bufEnd = l - wavI
             wavStart = wavI
 
-            #print("[>] wavI =", wavI, "\tout:", wavStart, "to", n, \
-            #        "\tbuf: 0 to", bufEnd, "|", (n - wavStart))
+            #print("[>] wavI =", wavI, "\tout:", wavStart, "to", l, \
+            #        "\tbuf: 0 to", bufEnd, "|", (l - wavStart))
 
-            out[wavStart:n] += buf[0:bufEnd]
+            out[wavStart:l] += buf[0:bufEnd]
         else:
             wavStart = wavI
             wavEnd = wavStart + size

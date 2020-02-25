@@ -56,7 +56,8 @@ def wav2bmp_ocl(fs, wav, size, bins, startFreq, endFreq,
 
     freqs = ft_freqs(bins, startFreq, endFreq)
     freqCount = len(freqs)
-    start, n, step, iters = fft.get_fft_stats(len(wav), size, overlapDec)
+    n = len(wav)
+    start, step, iters = fft.get_fft_stats(n, size, overlapDec)
 
     platforms = cl.get_platforms()
 

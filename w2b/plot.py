@@ -100,22 +100,7 @@ def draw_ang(name, fs, size, overlapDec, ab, an,
         if endFreq == None:
             endFreq = binFreqs[-1]
 
-    assert np.amin(abNorm) >= 0.0
-    assert np.amax(abNorm) <= 1.0
-    assert np.amin(an) >= 0.0
-    assert np.amax(an) <  1.0
-
-    img = np.ndarray((abNorm.shape[0], abNorm.shape[1], 3), dtype="float32")
-
-    img[:, :, 0] = abNorm[:, :] * \
-            np.interp(an[:, :], colourMap["r"]["x"], colourMap["r"]["y"])
-    img[:, :, 1] = abNorm[:, :] * \
-            np.interp(an[:, :], colourMap["g"]["x"], colourMap["g"]["y"])
-    img[:, :, 2] = abNorm[:, :] * \
-            np.interp(an[:, :], colourMap["b"]["x"], colourMap["b"]["y"])
-
-    assert np.amin(img) >= 0.0
-    assert np.amax(img) <= 1.0
+    img = util.apply_colourmap(abNorm, an, colourMap)
 
     graphName = "ang [" + name + "]\nfs = " + str(fs) + \
             ", size = " + str(size) + ", bins = " + str(bins) + \
