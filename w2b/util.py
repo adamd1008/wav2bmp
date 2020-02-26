@@ -20,12 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os.path
+import re
+
 import numpy as np
 from numpy.fft import rfftfreq
 
 
 ################################################################################
 def norm(ar):
+    assert type(ar) == np.ndarray
+
     if ar.dtype != "float32":
         ret = ar.astype("float32", casting="safe")
         return ret / np.iinfo(ar.dtype).max
@@ -37,6 +42,12 @@ def norm(ar):
             return ar / arMin
         else:
             return ar / arMax
+
+
+################################################################################
+def convert_to_img_type(ar):
+    assert type(ar) == np.ndarray
+    return (ar * 255.0).astype("uint8")
 
 
 ################################################################################
@@ -168,3 +179,135 @@ def apply_colourmap(ab, an, cm):
 
     return ret
 
+
+################################################################################
+def gen_filename(name, sampleRate, size, overlapDec,
+        fileType, fileExt, isNorm, bins=None, startFreq=None, endFreq=None):
+    """Returns a file name which contains all relevant information."""
+
+    if "___" in fileName:
+        raise ValueError("Filename cannot contain '___'")
+
+    if (bins == None) or (startFreq == None) or (endFreq == None):
+        binFreqs, logFreqs = util.log_freq(fs, size)
+
+        if bins == None:
+            bins = len(binFreqs)
+
+        if startFreq == None:
+            startFreq = binFreqs[0]
+
+        if endFreq == None:
+            endFreq = binFreqs[-1]
+
+    ret = "{name}___fs{fs}_s{s}_b{b}_sf{sf}_ef{ef}_o{o}_{fileType}".format(
+            name=name, fs=fs, s=s, b=b, sf=sf, ef=ef, o=o, fileType=fileType)
+
+    if isNorm:
+        ret += "_norm"
+
+    ret += ".{fileExt}".format(fileExt=fileExt)
+    return ret
+
+
+################################################################################
+def gen_filename_w_dict(field_dict):
+    return gen_filename(*field_dict)
+
+
+################################################################################
+def parse_filename_fields(tail_list):
+    ret = {
+        "sampleRate": None,
+        "size": None,
+        "bins": None,
+        "startFreq": None,
+        "endFreq": None,
+        "overlapDec": None,
+        "fileType": None
+    }
+
+    m = re.match("^fs(\d+)$", tail_list[0])
+
+    if m:
+        ret["sampleRate"] = float(m.group(1))
+    else:
+        raise ValueError("Invalid sample rate field: \"{}\"".format(
+            tail_list[0]))
+
+    m = re.match("^s(\d+)$", tail_list[1])
+
+    if m:
+        ret["size"] = int(m.group(1))
+    else:
+        raise ValueError("Invalid size field: \"{}\"".format(
+            tail_list[1]))
+
+    m = re.match("^b(\d+)$", tail_list[2])
+
+    if m:
+        ret["bins"] = int(m.group(1))
+    else:
+        raise ValueError("Invalid bins field: \"{}\"".format(
+            tail_list[2]))
+
+    m = re.match("^sf([\d.]+)$", tail_list[3])
+
+    if m:
+        ret["startFreq"] = float(m.group(1))
+    else:
+        raise ValueError("Invalid start frequency field: \"{}\"".format(
+            tail_list[3]))
+
+    m = re.match("^ef([\d.]+)$", tail_list[4])
+
+    if m:
+        ret["endFreq"] = float(m.group(1))
+    else:
+        raise ValueError("Invalid end frequency field: \"{}\"".format(
+            tail_list[4]))
+
+    m = re.match("^o([\d.]+)$", tail_list[5])
+
+    if m:
+        ret["overlapDec"] = float(m.group(1))
+    else:
+        raise ValueError("Invalid overlap decimals field: \"{}\"".format(
+            tail_list[5]))
+
+    m = re.match("^([a-z]+)$", tail_list[6])
+
+    if m:
+        ret["fileType"] = m.group(1)
+    else:
+        raise ValueError("Invalid file type field: \"{}\"".format(
+            tail_list[6]))
+
+    return ret
+
+
+################################################################################
+def parse_filename(fileName):
+    splitFileName = fileName.split('___')
+    fileName = splitFileName[0]
+    tailWExt = os.path.splitext(splitFileName[1])
+    tail = tailWExt[0].split('_')
+    ext = tailWExt[1][1:] # Trim dot
+    tl = len(tail)
+
+    if (tl == 7) or (tl == 8):
+        ret = parse_filename_fields(tail)
+        ret["fileName"] = fileName
+        ret["fileExt"] = ext
+        ret["isNorm"] = False
+
+        if tl == 8:
+            if tail[7] == "norm":
+                ret["isNorm"] = True
+            else:
+                raise ValueError("Invalid 8th field: \"{}\"".format(tail[7]))
+    else:
+        raise ValueError("Expected 7 or 8 tail fields; got {}".format(
+            len(tail)))
+
+    return ret

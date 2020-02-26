@@ -35,9 +35,9 @@ def write_abs(name, fs, size, overlapDec, ab, inv=False):
     rawName = baseName + ".npy"
 
     if inv:
-        ab2 = util.flip_norm(ab)
+        ab2 = util.convert_to_img_type(util.flip_norm(ab))
     else:
-        ab2 = ab
+        ab2 = util.convert_to_img_type(ab)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab2))
@@ -56,9 +56,9 @@ def write_abs_ocl(name, fs, size, bins, startFreq, endFreq,
     rawName = baseName + ".npy"
 
     if inv:
-        ab2 = util.flip_norm(ab)
+        ab2 = util.convert_to_img_type(util.flip_norm(ab))
     else:
-        ab2 = ab
+        ab2 = util.convert_to_img_type(ab)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab2))
@@ -76,9 +76,9 @@ def write_abs_db(name, fs, size, overlapDec, ab, inv=False):
     rawName = baseName + ".npy"
 
     if inv:
-        ab_db2 = util.flip_norm(ab_db)
+        ab_db2 = util.convert_to_img_type(util.flip_norm(ab_db))
     else:
-        ab_db2 = ab_db
+        ab_db2 = util.convert_to_img_type(ab_db)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab_db2))
@@ -98,9 +98,9 @@ def write_abs_db_ocl(name, fs, size, bins, startFreq, endFreq,
     rawName = baseName + ".npy"
 
     if inv:
-        ab_db2 = util.flip_norm(ab_db)
+        ab_db2 = util.convert_to_img_type(util.flip_norm(ab_db))
     else:
-        ab_db2 = ab_db
+        ab_db2 = util.convert_to_img_type(ab_db)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab_db2))
@@ -119,9 +119,9 @@ def write_abs_db_log(name, fs, size, overlapDec, ab, inv=False):
     rawName = baseName + ".npy"
 
     if inv:
-        ab_db_log2 = util.flip_norm(ab_db_log)
+        ab_db_log2 = util.convert_to_img_type(util.flip_norm(ab_db_log))
     else:
-        ab_db_log2 = ab_db_log
+        ab_db_log2 = util.convert_to_img_type(ab_db_log)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab_db_log2))
@@ -163,7 +163,7 @@ def write_ang(name, fs, size, overlapDec, ab, an,
     imgName = baseName + ".bmp"
     rawName = baseName + ".npy"
 
-    img = util.apply_colourmap(abNorm, an, colourMap)
+    img = util.convert_to_img_type(util.apply_colourmap(abNorm, an, colourMap))
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(img))
