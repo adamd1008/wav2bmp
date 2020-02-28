@@ -181,8 +181,8 @@ def apply_colourmap(ab, an, cm):
 
 
 ################################################################################
-def gen_filename(name, sampleRate, size, overlapDec,
-        fileType, fileExt, isNorm, bins=None, startFreq=None, endFreq=None):
+def gen_filename(fileName, sampleRate, size, overlapDec, fileType,
+        fileExt, isNorm, bins=None, startFreq=None, endFreq=None):
     """Returns a file name which contains all relevant information."""
 
     if "___" in fileName:
@@ -201,7 +201,8 @@ def gen_filename(name, sampleRate, size, overlapDec,
             endFreq = binFreqs[-1]
 
     ret = "{name}___fs{fs}_s{s}_b{b}_sf{sf}_ef{ef}_o{o}_{fileType}".format(
-            name=name, fs=fs, s=s, b=b, sf=sf, ef=ef, o=o, fileType=fileType)
+            name=fileName, fs=sampleRate, s=size, b=bins,
+            sf=startFreq, ef=endFreq, o=overlapDec, fileType=fileType)
 
     if isNorm:
         ret += "_norm"
@@ -216,6 +217,22 @@ def gen_filename_w_dict(field_dict):
 
 
 ################################################################################
+def validate_float(f):
+    assert type(f) == float
+    assert f >= 0.0
+
+    return f
+
+
+################################################################################
+def validate_int(i):
+    assert type(i) == int
+    assert i >= 0
+
+    return i
+
+
+################################################################################
 def parse_filename_fields(tail_list):
     ret = {
         "sampleRate": None,
@@ -227,10 +244,10 @@ def parse_filename_fields(tail_list):
         "fileType": None
     }
 
-    m = re.match("^fs(\d+)$", tail_list[0])
+    m = re.match("^fs([\d.]+)$", tail_list[0])
 
     if m:
-        ret["sampleRate"] = float(m.group(1))
+        ret["sampleRate"] = validate_float(float(m.group(1)))
     else:
         raise ValueError("Invalid sample rate field: \"{}\"".format(
             tail_list[0]))
@@ -238,7 +255,7 @@ def parse_filename_fields(tail_list):
     m = re.match("^s(\d+)$", tail_list[1])
 
     if m:
-        ret["size"] = int(m.group(1))
+        ret["size"] = validate_int(int(m.group(1)))
     else:
         raise ValueError("Invalid size field: \"{}\"".format(
             tail_list[1]))
@@ -246,7 +263,7 @@ def parse_filename_fields(tail_list):
     m = re.match("^b(\d+)$", tail_list[2])
 
     if m:
-        ret["bins"] = int(m.group(1))
+        ret["bins"] = validate_int(int(m.group(1)))
     else:
         raise ValueError("Invalid bins field: \"{}\"".format(
             tail_list[2]))
@@ -254,7 +271,7 @@ def parse_filename_fields(tail_list):
     m = re.match("^sf([\d.]+)$", tail_list[3])
 
     if m:
-        ret["startFreq"] = float(m.group(1))
+        ret["startFreq"] = validate_float(float(m.group(1)))
     else:
         raise ValueError("Invalid start frequency field: \"{}\"".format(
             tail_list[3]))
@@ -262,7 +279,7 @@ def parse_filename_fields(tail_list):
     m = re.match("^ef([\d.]+)$", tail_list[4])
 
     if m:
-        ret["endFreq"] = float(m.group(1))
+        ret["endFreq"] = validate_float(float(m.group(1)))
     else:
         raise ValueError("Invalid end frequency field: \"{}\"".format(
             tail_list[4]))
@@ -270,7 +287,7 @@ def parse_filename_fields(tail_list):
     m = re.match("^o([\d.]+)$", tail_list[5])
 
     if m:
-        ret["overlapDec"] = float(m.group(1))
+        ret["overlapDec"] = validate_float(float(m.group(1)))
     else:
         raise ValueError("Invalid overlap decimals field: \"{}\"".format(
             tail_list[5]))
