@@ -8,9 +8,7 @@ import w2b.util as util
 
 
 # TODO:
-# (1) Tests to convert fields to filename.
-# (2) Tests to convert filename to fields and back again.
-# (3) Tests to test errors raised.
+# * Tests to test errors raised.
 
 
 ################################################################################
@@ -18,10 +16,10 @@ class TestFileNameToNameParam(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.param_list = [
-                ("test_wav.wav___fs44100_s4096_b2049_" +
-                 "sf0.0_ef22050.0_o0.875_ab.npy"),
                 ("test_wav.wav___fs44100.0_s4096_b2049_" +
-                 "sf0.0_ef22050.0_o0.875_an_norm.bmp")
+                 "sf0.0_ef22050.0_o0.875_ab.npy"),
+                ("test_wav.wav___fs44100.0_s1024_b513_" +
+                 "sf1000.0_ef2000.0_o0.5_an_norm.bmp")
         ]
 
     def test_parse_filename_to_name(self):

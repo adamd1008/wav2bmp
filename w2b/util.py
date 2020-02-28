@@ -213,7 +213,7 @@ def gen_filename(fileName, sampleRate, size, overlapDec, fileType,
 
 ################################################################################
 def gen_filename_w_dict(field_dict):
-    return gen_filename(*field_dict)
+    return gen_filename(**field_dict)
 
 
 ################################################################################
