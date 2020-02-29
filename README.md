@@ -6,9 +6,11 @@ A simple Python 3 library for converting a WAV file into a BMP (and back!).
 
 ### Download and install Python 3
 
-Download the latest version of Python 3.X from the [official website](https://www.python.org/downloads/).
+Download the latest version of Python 3.X from the [official
+website](https://www.python.org/downloads/).
 
-When installing, be sure to tick the box titled "Add Python 3.X to PATH". This will make it much easier to invoke Python from a command-line terminal.
+When installing, be sure to tick the box titled "Add Python 3.X to PATH". This
+will make it much easier to invoke Python from a command-line terminal.
 
 ### Install the required Python 3 libraries
 
@@ -18,7 +20,9 @@ From the command-line:
 python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose imageio
 ```
 
-Note: you may need to use the command `python3` in place of `python`, depending on your platform. If in doubt, to find the version you are using, use command `python --version`.
+Note: you may need to use the command `python3` in place of `python`, depending
+on your platform. If in doubt, to find the version you are using, use command
+`python --version`.
 
 ### Clone/download the code
 
@@ -34,79 +38,112 @@ This is up to you, if you want to perform resynthesis (i.e. BMP -> WAV).
 
 ### Copy any WAVs to the repository directory
 
-One WAV, `square_2.wav`, is included as part of this repository. It is a 500 Hz square wave with only two harmonics, and has a sample rate of 10 kHz. As such, it's an extremely simple example that helps to illustrate resynthesis. Be warned: it's normalised, so will be very loud when played back.
+One WAV, `square\_2.wav`, is included as part of this repository. It is a 500 Hz
+square wave with only two harmonics, and has a sample rate of 10 kHz. As such,
+it's an extremely simple example that helps to illustrate resynthesis. Be
+warned: it's normalised, so will be very loud when played back.
 
-The tools in this repository operate on WAV files that you have on your system. When image files are generated, they will be written to the same directory as the source WAV file. Note that this tool can, depending on the FFT size and overlap values, generate huge image files. Those who are concerned about their SSDs should only use this tool on a hard disk drive.
+The tools in this repository operate on WAV files that you have on your system.
+When image files are generated, they will be written to the same directory as
+the source WAV file. Note that this tool can, depending on the FFT size and
+overlap values, generate huge image files. Those who are concerned about their
+SSDs should only use this tool on a hard disk drive.
 
 ## Quick start #1: my first analysis using `wav2bmp`
 
-Navigate to the `wav2bmp` directory in a command-line terminal. In this first example we will be using the included WAV called `square_2.wav`. The script that will generate our BMPs is called `wav2bmp.py`. Run the following command:
+Navigate to the `wav2bmp` directory in a command-line terminal. In this first
+example we will be using the included WAV called `square\_2.wav`. The script
+that will generate our BMPs is called `wav2bmp.py`. Run the following command:
 
 ```
-python wav2bmp.py square_2.wav 1024 0.5
+python wav2bmp.py square\_2.wav 1024 0.5
 ```
 
-Examine the generated graphs and close them. As stated in the script output, `wav2bmp.py` has written two files:
+Examine the generated graphs and close them. As stated in the script output,
+`wav2bmp.py` has written two files:
 
-- `square_2.wav_fs10000_s1024_o0.5_ab_db.bmp`
-- `square_2.wav_fs10000_s1024_o0.5_ab_db.npy`
+- `square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db.bmp`
+- `square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db.npy`
 
-Ignore the `.npy` file. Both of these files are the spectrogram in different formats.
+Ignore the `.npy` file. Both of these files are the spectrogram in different
+formats.
 
 ## Quick start #2: my first resynthesis using `bmp2wav`
 
-Now that we have a spectrogram, it's time to create a mask with which to modify the amplitude data. I have included example masks that I made in this repository.
+Now that we have a spectrogram, it's time to create a mask with which to modify
+the amplitude data. I have included example masks that I made in this
+repository.
 
-Run the script twice to resynthesize the square wave with each harmonic removed using each included mask. The two commands to do this are:
+Run the script twice to resynthesize the square wave with each harmonic removed
+using each included mask. The two commands to do this are:
 
 ```
-python bmp2wav.py square_2.wav square_2.wav_fs10000_s1024_o0.5_ab_db_mask1.bmp 1024 0.5
-python bmp2wav.py square_2.wav square_2.wav_fs10000_s1024_o0.5_ab_db_mask2.bmp 1024 0.5
+python bmp2wav.py square\_2.wav
+square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db\_mask1.bmp 1024 0.5 python bmp2wav.py
+square\_2.wav square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db\_mask2.bmp 1024 0.5
 ```
 
-Examine and close the graphs generated by each command, and we're done. The two resynthesized WAVs are:
+Examine and close the graphs generated by each command, and we're done. The two
+resynthesized WAVs are:
 
-- `square_2.wav_fs10000_s1024_o0.5_ab_db_mask1.bmp_out.wav`
-- `square_2.wav_fs10000_s1024_o0.5_ab_db_mask2.bmp_out.wav`
+- `square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db\_mask1.bmp\_out.wav`
+- `square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db\_mask2.bmp\_out.wav`
 
-The script also copied the source WAV and removed all channels other than the first. Compare these three WAVs to see the difference.
+The script also copied the source WAV and removed all channels other than the
+first. Compare these three WAVs to see the difference.
 
 ## Usage details
 
 ### `wav2bmp`
 
-Don't worry about "lossy conversion" warnings.
+A graph will have been drawn and displayed. This is the spectrogram. Note that
+the axes are purely FFT and frequency bin indices. Converting these values to
+either time or frequency, respectively, requires more work.
 
-A graph will have been drawn and displayed. This is the spectrogram. Note that the axes are purely FFT and frequency bin indices. Converting these values to either time or frequency, respectively, requires more work.
-
-If you're interested, NumPy provides the `numpy.fft.rfftfreq(n)` function to determine the frequencies of each of the specific bins. This is used already in the code as part of the function `util.log_freq()`, used by the logarithmic graph and image functions `w2b.plot.draw_abs_db_log()` and `w2b.img.write_abs_db_log()`, respectively.
+If you're interested, NumPy provides the `numpy.fft.rfftfreq(n)` function to
+determine the frequencies of each of the specific bins. This is used already in
+the code as part of the function `util.log\_freq()`, used by the logarithmic
+graph and image functions `w2b.plot.draw\_abs\_db\_log()` and
+`w2b.img.write\_abs\_db\_log()`, respectively.
 
 W2B writes images with several pieces of information encoded into the name:
 
 - Source WAV name
 - Sample rate ("fs10000", i.e. 10 kHz)
 - FFT size ("s1024", i.e. 1024 frequency bins)
-- FFT overlap ("o0.5", i.e. the FFT window is moved one-half of the length of the FFT size)
-- Type of data ("ab_db", i.e. this is the absolute (amplitude) data, with logarithmic values)
+- FFT overlap ("o0.5", i.e. the FFT window is moved one-half of the length of
+  the FFT size)
+- Type of data ("ab\_db", i.e. this is the absolute (amplitude) data, with
+  logarithmic values)
 
 This is purely for your information - W2B scripts don't actually parse this.
 
 ### `bmp2wav`
 
-This script also generates a "bmp_in" WAV for easy comparison. This is useful if the source WAV has multiple channels, in which case the "bmp_in" WAV only includes the first channel (which the `wav2bmp.py` script works on).
+This script also generates a "bmp\_in" WAV for easy comparison. This is useful
+if the source WAV has multiple channels, in which case the "bmp\_in" WAV only
+includes the first channel (which the `wav2bmp.py` script works on).
 
 ### Using GIMP to create your own mask
 
-You can use any tool that you like to create a mask, but the image you create must be grayscale like the image that was created by `wav2bmp.py`, and have the exact same dimensions.
+You can use any tool that you like to create a mask, but the image you create
+must be grayscale like the image that was created by `wav2bmp.py`, and have the
+exact same dimensions.
 
-Using GIMP, load the generated spectrogram (e.g. `square_2.wav_fs10000_s1024_o0.5_ab_db.bmp`) and create a new layer. Ensure that you tick the "lock position and size" box, set the opacity to 20-30, and set "fill with" to white. This allows us to draw in black on the new layer while being able to see the spectrogram underneath. Any area of black drawn on the new layer, once exported as its own BMP, can be used with the `bmp2wav.py` script to cancel out the frequencies present in those positions.
+Using GIMP, load the generated spectrogram (e.g.
+`square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db.bmp`) and create a new layer. Ensure
+that you tick the "lock position and size" box, set the opacity to 20-30, and
+set "fill with" to white. This allows us to draw in black on the new layer
+while being able to see the spectrogram underneath. Any area of black drawn on
+the new layer, once exported as its own BMP, can be used with the `bmp2wav.py`
+script to cancel out the frequencies present in those positions.
 
-Before exporting, click the eye icon in the layers widget to hide the spectrogram, then export the image. I typically use the name of the spectrogram image and add "\_mask" before the file extension. So now I have the mask saved as `square_2.wav_fs10000_s1024_o0.5_ab_db_mask1.bmp`.
+Before exporting, click the eye icon in the layers widget to hide the
+spectrogram, then export the image. I typically use the name of the spectrogram
+image and add "\_mask" before the file extension. So now I have the mask saved
+as `square\_2.wav\_fs10000\_s1024\_o0.5\_ab\_db\_mask1.bmp`.
 
 ## Useful tools to check out
 
-I have provided the tools `print_sizes.py` and `print_overlaps.py` which will help in choosing a suitable size and overlap when analysing a WAV.
-
-## Known issues
-
-There is an issue with the amplitude of resynthesized data, especially the start and end samples when an overlap is used.
+I have provided the tools `print\_sizes.py` and `print\_overlaps.py` which will
+help in choosing a suitable size and overlap when analysing a WAV.
