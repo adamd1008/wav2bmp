@@ -88,7 +88,7 @@ def main(wavName, maskName, size, overlapDec):
     print("Drawing more graphs...")
     plot.draw_abs("out", fs, size, overlapDec, ab)
     plot.draw_abs_db("out", fs, size, overlapDec, ab)
-    plot.draw_ang("out", fs, size, overlapDec, an)
+    plot.draw_ang("out", fs, size, overlapDec, ab, an)
 
     print("Writing WAVs...")
     wav.write(maskName + "_in.wav", fs, s0)

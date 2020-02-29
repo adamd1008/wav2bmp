@@ -29,7 +29,7 @@ from numpy.fft import rfftfreq
 
 ################################################################################
 def norm(ar):
-    assert type(ar) == np.ndarray
+    #assert type(ar) == np.ndarray
 
     if ar.dtype != "float32":
         ret = ar.astype("float32", casting="safe")
