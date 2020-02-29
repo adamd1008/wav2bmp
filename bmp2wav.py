@@ -49,7 +49,8 @@ def main(wavName, maskName, size, overlapDec):
     assert mask.ndim == 2
 
     print("Retrieving FFT data from WAV...")
-    ab, an, x = fft.wav2bmp(fs, s0, size, overlapDec)
+    # XXX: MUST USE NO WINDOW!
+    ab, an, x = fft.wav2bmp(fs, s0, size, overlapDec, window=None)
 
     print("Resynthesizing mask image...")
     out = fft.bmp2wav(fs, l, x, mask, size, overlapDec)
@@ -85,9 +86,9 @@ def main(wavName, maskName, size, overlapDec):
     ab, an, x = fft.wav2bmp(fs, out2, size, overlapDec)
 
     print("Drawing more graphs...")
-    #plot.draw_abs("out", fs, size, overlapDec, ab)
+    plot.draw_abs("out", fs, size, overlapDec, ab)
     plot.draw_abs_db("out", fs, size, overlapDec, ab)
-    #plot.draw_ang("out", fs, size, overlapDec, an)
+    plot.draw_ang("out", fs, size, overlapDec, an)
 
     print("Writing WAVs...")
     wav.write(maskName + "_in.wav", fs, s0)

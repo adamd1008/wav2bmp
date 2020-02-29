@@ -114,6 +114,12 @@ def get_fft_stats(n, size, overlapDec):
 ################################################################################
 def wav2bmp(fs, wav, size=1024, overlapDec=0.0, window=np.hanning):
     """Transform wave samples into a spectrogram image.
+
+    Warning: using a window in the bmp2wav flow (when recomputing the complex
+    FFT result for resynthesis with the mask image) will result in a very badly
+    scaled result!
+
+    See tests/test_bmp2wav.py.
     """
 
     if wav.ndim != 1:
@@ -201,10 +207,6 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
     that image into wave samples. This removes the need to convert the
     amplitude and angle BMPs back into complex numbers for the filter mask
     scaling.
-
-    TODO: this function does not amplify the start and end iterations
-    appropriately, according to how many times a sample was used in all
-    iterations.
     """
     assert x.ndim == 2
     assert x.ndim == mask.ndim
@@ -216,15 +218,10 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
     fftI = 0
     wavI = start
     out = np.zeros(l, dtype="float32")
-    mult = np.log2(1.0 / (1.0 - overlapDec))
-
-    if mult == 0.0:
-        mult = 1.0
-
-    print("multiple =", mult)
+    mult = size / step
 
     while wavI < l:
-        buf = irfft(x[:, fftI] * mask[:, fftI]) / mult
+        buf = irfft(x[:, fftI] * mask[:, fftI])
 
         if wavI < 0:
             bufStart = size - (size + wavI)
@@ -234,7 +231,7 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
             #print("[<] wavI =", wavI, "\tout: 0 to", wavEnd, \
             #        "\tbuf:", bufStart, "to", bufEnd, "|", wavEnd)
 
-            out[0:wavEnd] += buf[bufStart:bufEnd]
+            out[0:wavEnd] += buf[bufStart:bufEnd] / mult
         elif (wavI + size) >= l:
             bufEnd = l - wavI
             wavStart = wavI
@@ -242,7 +239,7 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
             #print("[>] wavI =", wavI, "\tout:", wavStart, "to", l, \
             #        "\tbuf: 0 to", bufEnd, "|", (l - wavStart))
 
-            out[wavStart:l] += buf[0:bufEnd]
+            out[wavStart:l] += buf[0:bufEnd] / mult
         else:
             wavStart = wavI
             wavEnd = wavStart + size
@@ -250,7 +247,7 @@ def bmp2wav(fs, l, x, mask, size, overlapDec):
             #print("[=] wavI =", wavI, "\tout:", wavStart, "to", wavEnd, \
             #        "\t\tbuf: 0 to", buf.shape[0], "|", (wavEnd - wavStart))
 
-            out[wavStart:wavEnd] += buf[:]
+            out[wavStart:wavEnd] += buf[:] / mult
 
         fftI += 1
         wavI += step

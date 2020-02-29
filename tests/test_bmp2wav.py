@@ -19,9 +19,9 @@ class TestBmp2Wav(unittest.TestCase):
 
     def draw_diff(self, title, i, o, doAbs=True):
         if doAbs:
-            diff = np.abs(o) - np.abs(i)
+            diff = np.abs(i) - np.abs(o)
         else:
-            diff = o - i
+            diff = i - o
 
         fig = plt.figure()
         fig.suptitle("Array differences ({})".format(title))
@@ -30,11 +30,11 @@ class TestBmp2Wav(unittest.TestCase):
         plt.show(block=False)
 
 
-    def _test_bmp2wav_basic(self):
+    def test_bmp2wav_basic_low_fs(self):
         fs = 100.0
-        size = 16
-        overlapDec = 0.9375
-        l = 100
+        size = 4
+        overlapDec = 0.75
+        l = 10
         assert int(l / 2) == (l / 2)
 
         # Generate a test wav (sequence of +1.0, -1.0, +1.0, -1.0, ...)
@@ -48,29 +48,52 @@ class TestBmp2Wav(unittest.TestCase):
 
         # Do b2w
         out = fft.bmp2wav(fs, l, x, mask, size, overlapDec)
-        outMin = np.amin(out)
-        outMax = np.amax(out)
-        print("min(out) = {:+}".format(outMin))
-        print("max(out) = {:+}".format(outMax))
 
-        #if outMin < -1.0 or outMax > 1.0:
-        #    print("Resynthesized WAV samples are out-of-range; normalising...")
-        #    out2 = util.norm(out)
-        #else:
-        out2 = out
+        #fig = plt.figure()
+        #fig.suptitle("Original WAV vs reynthesized WAV (basic)")
+        #plt.subplot(2, 1, 1)
+        #plt.plot(np.arange(0, out.size, dtype="float32"), ar2)
+        #plt.grid(True)
+        #plt.subplot(2, 1, 2)
+        #plt.plot(np.arange(0, out.size, dtype="float32"), out)
+        #plt.grid(True)
+        #plt.show(block=False)
+        #self.draw_diff("basic", ar2, out)
 
-        print("Drawing graphs...")
-        fig = plt.figure()
-        fig.suptitle("Original WAV vs reynthesized WAV (basic)")
-        plt.subplot(2, 1, 1)
-        plt.plot(np.arange(0, out2.size, dtype="float32"), ar2)
-        plt.grid(True)
-        plt.subplot(2, 1, 2)
-        plt.plot(np.arange(0, out2.size, dtype="float32"), out2)
-        plt.grid(True)
-        plt.show(block=False)
+        self.assertTrue(np.allclose(ar2, out))
 
-        self.draw_diff("basic", ar2, out2)
+
+    def test_bmp2wav_basic_high_fs(self):
+        fs = 44100.0
+        size = 1024
+        overlapDec = 0.9375
+        l = 100000
+        assert int(l / 2) == (l / 2)
+
+        # Generate a test wav (sequence of +1.0, -1.0, +1.0, -1.0, ...)
+        ar = np.array([ 1.0, -1.0], dtype="float32")
+        ar2 = np.tile(ar, int(l / 2))
+        ab, an, x = fft.wav2bmp(fs, ar2, size, overlapDec, window=None)
+
+        # Generate a blank mask
+        mask = np.ndarray(ab.shape, dtype="float32")
+        mask[:, :] = 1.0
+
+        # Do b2w
+        out = fft.bmp2wav(fs, l, x, mask, size, overlapDec)
+
+        #fig = plt.figure()
+        #fig.suptitle("Original WAV vs reynthesized WAV (basic)")
+        #plt.subplot(2, 1, 1)
+        #plt.plot(np.arange(0, out.size, dtype="float32"), ar2)
+        #plt.grid(True)
+        #plt.subplot(2, 1, 2)
+        #plt.plot(np.arange(0, out.size, dtype="float32"), out)
+        #plt.grid(True)
+        #plt.show(block=False)
+        #self.draw_diff("basic", ar2, out)
+
+        self.assertTrue(np.allclose(ar2, out))
 
 
     def test_bmp2wav_square_2(self):
@@ -84,7 +107,7 @@ class TestBmp2Wav(unittest.TestCase):
         else:
             ar2 = ar
 
-        ab, an, x = fft.wav2bmp(fs, ar2, size, overlapDec)
+        ab, an, x = fft.wav2bmp(fs, ar2, size, overlapDec, window=None)
 
         # Generate a blank mask
         mask = np.ndarray(ab.shape, dtype="float32")
@@ -92,29 +115,19 @@ class TestBmp2Wav(unittest.TestCase):
 
         # Do b2w
         out = fft.bmp2wav(fs, l, x, mask, size, overlapDec)
-        outMin = np.amin(out)
-        outMax = np.amax(out)
-        print("min(out) = {:+}".format(outMin))
-        print("max(out) = {:+}".format(outMax))
 
-        #if outMin < -1.0 or outMax > 1.0:
-        #    print("Resynthesized WAV samples are out-of-range; normalising...")
-        #    out2 = util.norm(out)
-        #else:
-        out2 = out
+        #fig = plt.figure()
+        #fig.suptitle("Original WAV vs reynthesized WAV (basic)")
+        #plt.subplot(2, 1, 1)
+        #plt.plot(np.arange(0, out.size, dtype="float32"), ar2)
+        #plt.grid(True)
+        #plt.subplot(2, 1, 2)
+        #plt.plot(np.arange(0, out.size, dtype="float32"), out)
+        #plt.grid(True)
+        #plt.show(block=False)
+        #self.draw_diff("square_2", ar2, out)
 
-        print("Drawing graphs...")
-        fig = plt.figure()
-        fig.suptitle("Original WAV vs reynthesized WAV (square_2)")
-        plt.subplot(2, 1, 1)
-        plt.plot(np.arange(0, out2.size, dtype="float32"), ar2)
-        plt.grid(True)
-        plt.subplot(2, 1, 2)
-        plt.plot(np.arange(0, out2.size, dtype="float32"), out2)
-        plt.grid(True)
-        plt.show(block=False)
-
-        self.draw_diff("square_2", ar2, out2)
+        self.assertTrue(np.allclose(ar2, out))
 
 
 ################################################################################
