@@ -40,17 +40,21 @@ def main(maskName):
 
     print("Drawing harmonics...")
     mask2 = np.array(mask, dtype="float32")
+    mask3 = np.array(mask, dtype="float32")
     print("dim: {}".format(mask2.shape))
 
-    tn = mask2.shape[0]
-    fn = mask2.shape[1]
+    fn = mask2.shape[0]
+    tn = mask2.shape[1]
     z = np.zeros(fn, dtype="float32")
+
+    print("Time axis length: {}".format(tn))
+    print("Bins axis length: {}".format(fn))
 
     for t in range(0, tn):
         low = -1
         high = -1
 
-        closeArray = np.isclose(z, mask2[t, :])
+        closeArray = np.isclose(z, mask2[:, t])
 
         for f in range(0, fn):
             if (low == -1) and (~closeArray[f]):
@@ -68,9 +72,14 @@ def main(maskName):
             nextFreqIdx = fundFreqIdx * 2
             print("range (idx): {} to {} ({})".format(low, high, frange))
 
-            while nextFreqIdx < fn:
-                mask2[t, (nextFreqIdx - frangeDiv2):(nextFreqIdx + frangeDiv2)] = \
-                        mask2[t, (fundFreqIdx - frangeDiv2):(fundFreqIdx + frangeDiv2)]
+            while (nextFreqIdx + frangeDiv2) < fn:
+                dstStart = nextFreqIdx - frangeDiv2
+                dstEnd = nextFreqIdx + frangeDiv2
+                srcStart = fundFreqIdx - frangeDiv2
+                srcEnd = fundFreqIdx + frangeDiv2
+
+                mask3[dstStart:dstEnd, t] = mask2[srcStart:srcEnd, t]
+
                 nextFreqIdx += fundFreqIdx
 
     fig = plt.figure()
@@ -78,8 +87,10 @@ def main(maskName):
     plt.subplot(1, 2, 1)
     plt.imshow(mask, cmap="gray", origin="lower")
     plt.subplot(1, 2, 2)
-    plt.imshow(mask2, cmap="gray", origin="lower")
+    plt.imshow(mask3, cmap="gray", origin="lower")
     plt.show(block=False)
+
+    iio.imwrite(maskName + "_harmmask.bmp", np.flipud(mask3))
 
     print("Done")
     plt.show()
