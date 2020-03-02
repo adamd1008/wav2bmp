@@ -28,37 +28,19 @@ from . import util
 
 
 ################################################################################
-def write_abs(name, fs, size, overlapDec, ab, inv=False):
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + \
-            "_o" + str(overlapDec) + "_ab"
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
+def write_abs(
+        name, fs, size, overlapDec, ab,
+        bins=None, startFreq=None, endFreq=None):
+    """Write FT amplitude image and data to disk."""
 
-    if inv:
-        ab2 = util.convert_to_img_type(util.flip_norm(ab))
-    else:
-        ab2 = util.convert_to_img_type(ab)
+    imgName = util.gen_filename(
+            name, fs, size, overlapDec, "ab", "bmp", False,
+            bins, startFreq, endFreq)
+    rawName = util.gen_filename(
+            name, fs, size, overlapDec, "ab", "npy", False,
+            bins, startFreq, endFreq)
 
-    print("Writing image file \"" + imgName + "\"")
-    iio.imwrite(imgName, np.flipud(ab2))
-
-    print("Writing raw file \"" + rawName + "\"")
-    np.save(rawName, ab2)
-
-
-################################################################################
-def write_abs_ocl(name, fs, size, bins, startFreq, endFreq,
-        overlapDec, ab, inv=False):
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + "_b" + str(bins) + \
-            "_sf" + str(startFreq) + "_ef" + str(endFreq) + \
-            "_o" + str(overlapDec) + "_ab"
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
-
-    if inv:
-        ab2 = util.convert_to_img_type(util.flip_norm(ab))
-    else:
-        ab2 = util.convert_to_img_type(ab)
+    ab2 = util.convert_to_img_type(ab)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab2))
@@ -68,17 +50,20 @@ def write_abs_ocl(name, fs, size, bins, startFreq, endFreq,
 
 
 ################################################################################
-def write_abs_db(name, fs, size, overlapDec, ab, inv=False):
-    ab_db = util.mag2db_norm(ab)
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + \
-            "_o" + str(overlapDec) + "_ab_db"
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
+def write_abs_db(
+        name, fs, size, overlapDec, ab,
+        bins=None, startFreq=None, endFreq=None):
+    """Write FT decibel amplitude image and data to disk."""
 
-    if inv:
-        ab_db2 = util.convert_to_img_type(util.flip_norm(ab_db))
-    else:
-        ab_db2 = util.convert_to_img_type(ab_db)
+    imgName = util.gen_filename(
+            name, fs, size, overlapDec, "ab-dB", "bmp", False,
+            bins, startFreq, endFreq)
+    rawName = util.gen_filename(
+            name, fs, size, overlapDec, "ab-dB", "npy", False,
+            bins, startFreq, endFreq)
+
+    ab_db = util.mag2db_norm(ab)
+    ab_db2 = util.convert_to_img_type(ab_db)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab_db2))
@@ -88,40 +73,20 @@ def write_abs_db(name, fs, size, overlapDec, ab, inv=False):
 
 
 ################################################################################
-def write_abs_db_ocl(name, fs, size, bins, startFreq, endFreq,
-        overlapDec, ab, inv=False):
-    ab_db = util.mag2db_norm(ab)
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + "_b" + str(bins) + \
-            "_sf" + str(startFreq) + "_ef" + str(endFreq) + \
-            "_o" + str(overlapDec) + "_ab_dB"
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
+def write_abs_db_log(name, fs, size, overlapDec, ab):
+    """Write FT decibel amplitude image and data to disk with logarithmic
+    frequency."""
 
-    if inv:
-        ab_db2 = util.convert_to_img_type(util.flip_norm(ab_db))
-    else:
-        ab_db2 = util.convert_to_img_type(ab_db)
+    imgName = util.gen_filename(
+            name, fs, size, overlapDec, "ab-dB", "bmp", False,
+            bins, startFreq, endFreq)
+    rawName = util.gen_filename(
+            name, fs, size, overlapDec, "ab-dB", "npy", False,
+            bins, startFreq, endFreq)
 
-    print("Writing image file \"" + imgName + "\"")
-    iio.imwrite(imgName, np.flipud(ab_db2))
-
-    print("Writing raw file \"" + rawName + "\"")
-    np.save(rawName, ab_db2)
-
-
-################################################################################
-def write_abs_db_log(name, fs, size, overlapDec, ab, inv=False):
     binFreqs, logFreqs = util.log_freq(fs, size)
     ab_db_log = util.lin2log(util.mag2db_norm(ab), binFreqs, logFreqs)
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + \
-            "_o" + str(overlapDec) + "_ab_db_log"
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
-
-    if inv:
-        ab_db_log2 = util.convert_to_img_type(util.flip_norm(ab_db_log))
-    else:
-        ab_db_log2 = util.convert_to_img_type(ab_db_log)
+    ab_db_log2 = util.convert_to_img_type(ab_db_log)
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(ab_db_log2))
@@ -134,36 +99,21 @@ def write_abs_db_log(name, fs, size, overlapDec, ab, inv=False):
 def write_ang(name, fs, size, overlapDec, ab, an,
         bins=None, startFreq=None, endFreq=None,
         colourMap=cm.colour_maps["thermal1"], normAbs=True):
-    """Write the FFT phase information scaled by amplitude"""
+    """Write the FT phase information with colourmap applied."""
+
+    imgName = util.gen_filename(
+            name, fs, size, overlapDec, "ab-dB", "bmp", False,
+            bins, startFreq, endFreq)
+    rawName = util.gen_filename(
+            name, fs, size, overlapDec, "ab-dB", "npy", False,
+            bins, startFreq, endFreq)
 
     if normAbs:
-        abNorm = util.norm(ab)
+        ab2 = util.norm(ab)
     else:
-        abNorm = ab
+        ab2 = ab
 
-    if (bins == None) or (startFreq == None) or (endFreq == None):
-        binFreqs, logFreqs = util.log_freq(fs, size)
-
-        if bins == None:
-            bins = len(binFreqs)
-
-        if startFreq == None:
-            startFreq = binFreqs[0]
-
-        if endFreq == None:
-            endFreq = binFreqs[-1]
-
-    baseName = name + "_fs" + str(fs) + "_s" + str(size) + "_b" + str(bins) + \
-            "_sf" + str(startFreq) + "_ef" + str(endFreq) + \
-            "_o" + str(overlapDec) + "_an"
-
-    if normAbs:
-        baseName += "_norm"
-
-    imgName = baseName + ".bmp"
-    rawName = baseName + ".npy"
-
-    img = util.convert_to_img_type(util.apply_colourmap(abNorm, an, colourMap))
+    img = util.convert_to_img_type(util.apply_colourmap(ab2, an, colourMap))
 
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(img))

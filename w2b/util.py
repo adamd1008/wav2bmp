@@ -182,14 +182,14 @@ def apply_colourmap(ab, an, cm):
 
 ################################################################################
 def gen_filename(fileName, sampleRate, size, overlapDec, fileType,
-        fileExt, isNorm, bins=None, startFreq=None, endFreq=None):
+        fileExt, isNorm=False, bins=None, startFreq=None, endFreq=None):
     """Returns a file name which contains all relevant information."""
 
     if "___" in fileName:
         raise ValueError("Filename cannot contain '___'")
 
     if (bins == None) or (startFreq == None) or (endFreq == None):
-        binFreqs, logFreqs = util.log_freq(fs, size)
+        binFreqs, logFreqs = log_freq(sampleRate, size)
 
         if bins == None:
             bins = len(binFreqs)
