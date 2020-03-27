@@ -78,10 +78,10 @@ def write_abs_db_log(name, fs, size, overlapDec, ab):
     frequency."""
 
     imgName = util.gen_filename(
-            name, fs, size, overlapDec, "ab-dB", "bmp", False,
+            name, fs, size, overlapDec, "ab-dB-log", "bmp", False,
             bins, startFreq, endFreq)
     rawName = util.gen_filename(
-            name, fs, size, overlapDec, "ab-dB", "npy", False,
+            name, fs, size, overlapDec, "ab-dB-log", "npy", False,
             bins, startFreq, endFreq)
 
     binFreqs, logFreqs = util.log_freq(fs, size)
@@ -102,10 +102,10 @@ def write_ang(name, fs, size, overlapDec, ab, an,
     """Write the FT phase information with colourmap applied."""
 
     imgName = util.gen_filename(
-            name, fs, size, overlapDec, "ab-dB", "bmp", False,
+            name, fs, size, overlapDec, "an", "bmp", False,
             bins, startFreq, endFreq)
     rawName = util.gen_filename(
-            name, fs, size, overlapDec, "ab-dB", "npy", False,
+            name, fs, size, overlapDec, "an", "npy", False,
             bins, startFreq, endFreq)
 
     if normAbs:
