@@ -48,11 +48,16 @@ def main(wavName, maskName, size, overlapDec):
     mask = np.flipud(util.norm(iio.imread(maskName)))
     assert mask.ndim == 2
 
+    maskMin = np.amin(mask)
+    maskMax = np.amax(mask)
+    print("min(mask) = {:+}".format(maskMin))
+    print("max(mask) = {:+}".format(maskMax))
+
     print("Retrieving FFT data from WAV...")
     # XXX: MUST USE NO WINDOW!
     ab, an, x = fft.wav2bmp(fs, s0, size, overlapDec, window=None)
 
-    print("Resynthesizing mask image...")
+    print("Resynthesizing FFT data using mask...")
     out = fft.bmp2wav(fs, l, x, mask, size, overlapDec)
 
     outMin = np.amin(out)
@@ -77,6 +82,8 @@ def main(wavName, maskName, size, overlapDec):
     plt.grid(True)
     plt.show(block=False)
 
+    # XXX: there is a bug(?) which shows the mask image as black even if it's
+    # entirely white. WTF?
     fig = plt.figure()
     fig.suptitle("Mask image")
     plt.imshow(mask, cmap="gray", origin="lower")
