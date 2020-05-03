@@ -21,16 +21,50 @@
 # SOFTWARE.
 
 import numpy as np
-from numpy.fft import rfft, irfft
+from numpy.fft import rfft, irfft, rfftfreq
 
 from . import util
+
+
+################################################################################
+def get_pad_iters(size, overlapDec):
+    # So, start the spectrogram with size * overlapDec's worth of samples not
+    # in the FFT (4 zeros 50%, 6 zeroes 75%, 7 zeroes 87.5%, etc.)
+
+    assert type(size) == int
+    assert type(overlapDec) == float
+
+    overlap = int(size * overlapDec)
+    step = size - overlap
+
+    if np.floor(step) != step:
+        raise ValueError("`overlapDec' must produce whole step")
+
+    sampPerIter = int(size / step)
+
+    # Iterations is going to be one less than the number of times that step
+    # goes into size
+    padIters = sampPerIter - 1
+
+    return padIters
 
 
 ################################################################################
 def get_fft_stats(n, size, overlapDec):
     """Calculate the stats needed to iteratively compute the FFT over a set of
     wave samples with a given length, size and overlap.
+
+    The number of iterations for a perfectly "divisible" (no right padding)
+    number of samples `n` by the size and overlapDec is:
+
+        iters = n / (1.0 - overlapDec)
+
+        Add one more for padding if needed.
     """
+
+    assert type(n) == int
+    assert type(size) == int
+    assert type(overlapDec) == float
 
     if n < size:
         raise ValueError("`n' cannot be less than size")
@@ -51,33 +85,22 @@ def get_fft_stats(n, size, overlapDec):
     if int(sizeLog2) != sizeLog2:
         raise ValueError("Size must be 2^n")
 
-    sizeOverlap = size * overlapDec
+    if np.floor(size * (1.0 - overlapDec)) != (size * (1.0 - overlapDec)):
+        raise ValueError("`overlapDec' must produce whole step w.r.t. `size`")
 
-    if int(sizeOverlap) != sizeOverlap:
-        raise ValueError("Size is not wholly divisible by overlap")
+    # Given the size and overlap, the "window" that we consider for each
+    # iteration of the spectrogram steps `step` samples along the WAV data
+    step = int(size * (1.0 - overlapDec))
 
-    # So, start the spectrogram with size * overlapDec's worth of samples not
-    # in the FFT (4 zeros 50%, 6 zeroes 75%, 7 zeroes 87.5%, etc.)
-    overlap = int(size * overlapDec)
-    step = size - overlap
+    # Calculate left padding
+    leftPadIters = get_pad_iters(size, overlapDec)
+    start = -(step * leftPadIters)
 
-    if int(step) != step:
-        raise ValueError("`overlapDec' must produce whole step")
+    # The minimum number of iterations needed (may need one more for padding)
+    iters = int(n / step) + leftPadIters
+    nModStep = n % step
 
-    nDivStep = int(n / step)
-    nModStep = int(n % step)
-    sizeDivStep = int(size / step)
-
-    # Left iterations is going to be one less than the number of times that
-    # step goes into size
-    leftPadIters = sizeDivStep - 1
-    start = -(leftPadIters * step)
-
-    # Right iterations is a little harder; we need to check how many samples are
-    # left over when dividing all samples by step (not size, right?)
-
-    iters = nDivStep + leftPadIters
-
+    # Is right padding needed?
     if nModStep > 0:
         iters += 1
 
@@ -92,23 +115,73 @@ def get_fft_stats(n, size, overlapDec):
     #print("iters =", iters)
     #print()
 
-    #iterString = ""
-    #iterStringFirst = True
-    #count = 0
-
-    #for i in range(start, n, step):
-    #    if iterStringFirst:
-    #        iterStringFirst = False
-    #    else:
-    #        iterString += ", "
-
-    #    iterString += str(i) + " to " + str(i + size)
-    #    count += 1
-
-    #print(str(count) + " iters: ", iterString)
-    #print()
+    assert type(start) == int
+    assert type(step) == int
+    assert type(iters) == int
 
     return start, step, iters
+
+
+################################################################################
+def get_ifft_stats(iters, size, overlapDec):
+    """Calculate the stats needed to iteratively compute the IFFT...
+
+    Future enhancements: select size and overlapDec automagically based on
+    image dims.
+    """
+
+    assert type(iters) == int
+    assert type(size) == int
+    #assert type(bins) == int
+
+    #size = (bins - 1) * 2
+    #log2size = np.log2(size)
+
+    #if np.floor(log2size) != log2size:
+    #    raise ValueError("`bins` does not satisfy: (FFTSize/2) + 1")
+
+    if (overlapDec >= 1.0) or (overlapDec < 0.0):
+        raise ValueError("Overlap must be LT 1.0, GE 0.0")
+    elif overlapDec != 0.0:
+        overlapLog2 = np.log2(1.0 / (1.0 - overlapDec))
+
+        if int(overlapLog2) != overlapLog2:
+            raise ValueError("Overlap must be 1 / (2^n)")
+
+    paddedIters = get_pad_iters(size, overlapDec)
+    nonPaddedIters = int(iters - (paddedIters * 2))
+
+    #overlapScale = 1.0 / (1.0 - overlapDec)
+    #n = int(float(size) / overlapScale)
+    #padIters = get_pad_iters(size, overlapDec)
+
+    n = int(np.ceil((size * nonPaddedIters) * (1 - overlapDec)))
+
+    return n
+
+
+################################################################################
+def gen_phase_data(fs, size, iters):
+    """Generate periodic phase data (not sure if this is suitable)
+
+    XXX: future enhancement: take start and end frequencies.
+    """
+
+    assert fs > 0.0
+    assert type(size) == int
+    assert type(iters) == int
+
+    binFreqs = rfftfreq(size, d=(1.0 / fs))
+    out = np.zeros((len(binFreqs), iters), dtype="float32")
+    ts = 1.0 / fs
+    t = np.array([ts * t for t in range(0, iters)], dtype="float32")
+    pi2 = 2.0 * np.pi
+
+    for b in range(0, len(binFreqs)):
+        pi2f = pi2 * binFreqs[b]
+        out[b] = np.sin(pi2f * t)
+
+    return out
 
 
 ################################################################################
@@ -140,7 +213,8 @@ def wav2bmp(fs, wav, size=1024, overlapDec=0.0, window=np.hanning):
     elif window == None:
         wnd = None
     else:
-        raise ValueError("Expected `window' to be a function or NumPy array")
+        raise ValueError("Expected `window' to be a function, NumPy array " +
+                "or None")
 
     start, step, iters = get_fft_stats(l, size, overlapDec)
     c = 0

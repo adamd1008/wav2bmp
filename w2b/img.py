@@ -73,7 +73,9 @@ def write_abs_db(
 
 
 ################################################################################
-def write_abs_db_log(name, fs, size, overlapDec, ab):
+def write_abs_db_log(
+        name, fs, size, overlapDec, ab,
+        bins=None, startFreq=None, endFreq=None):
     """Write FT decibel amplitude image and data to disk with logarithmic
     frequency."""
 
