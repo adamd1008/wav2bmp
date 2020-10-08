@@ -50,10 +50,7 @@ def ft_freqs(bins, startFreq, endFreq):
 
 
 ################################################################################
-def wav2bmp_ocl(fs, wav, size, bins, startFreq, endFreq,
-        overlapDec=0.0, window=np.hanning):
-    global slowft
-
+def wav2bmp_ocl(fs, wav, size, bins, startFreq, endFreq, overlapDec=0.0):
     freqs = ft_freqs(bins, startFreq, endFreq)
     freqCount = len(freqs)
     n = len(wav)

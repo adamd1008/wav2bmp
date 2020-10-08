@@ -58,9 +58,9 @@ def main(name, size, bins, startFreq, endFreq, overlapDec):
             bins, startFreq, endFreq, block=False)
 
     print("Writing images...")
-    img.write_abs(name, fs, size, overlapDec, ab, bins, startFreq, endFreq)
-    img.write_abs_db(name, fs, size, overlapDec, ab,
-            bins, startFreq, endFreq)
+    #img.write_abs(name, fs, size, overlapDec, ab, bins, startFreq, endFreq)
+    #img.write_abs_db(name, fs, size, overlapDec, ab,
+    #        bins, startFreq, endFreq)
     img.write_ang(name, fs, size, overlapDec, ab, an, bins, startFreq, endFreq)
 
     print("Done")

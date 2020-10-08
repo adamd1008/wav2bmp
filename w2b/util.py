@@ -162,7 +162,7 @@ def angle(x):
 
 
 ################################################################################
-def apply_colourmap(ab, an, cm):
+def apply_colourmap(ab, an, cm, scale=True):
     assert ab.ndim == 2
     assert an.ndim == 2
     assert np.amin(ab) >= 0.0
@@ -170,9 +170,17 @@ def apply_colourmap(ab, an, cm):
 
     ret = np.ndarray((ab.shape[0], ab.shape[1], 3), dtype="float32")
 
-    ret[:, :, 0] = ab[:, :] * np.interp(an[:, :], cm["r"]["x"], cm["r"]["y"])
-    ret[:, :, 1] = ab[:, :] * np.interp(an[:, :], cm["g"]["x"], cm["g"]["y"])
-    ret[:, :, 2] = ab[:, :] * np.interp(an[:, :], cm["b"]["x"], cm["b"]["y"])
+    if scale:
+        ret[:, :, 0] = ab[:, :] * \
+                np.interp(an[:, :], cm["r"]["x"], cm["r"]["y"])
+        ret[:, :, 1] = ab[:, :] * \
+                np.interp(an[:, :], cm["g"]["x"], cm["g"]["y"])
+        ret[:, :, 2] = ab[:, :] * \
+                np.interp(an[:, :], cm["b"]["x"], cm["b"]["y"])
+    else:
+        ret[:, :, 0] = np.interp(an[:, :], cm["r"]["x"], cm["r"]["y"])
+        ret[:, :, 1] = np.interp(an[:, :], cm["g"]["x"], cm["g"]["y"])
+        ret[:, :, 2] = np.interp(an[:, :], cm["b"]["x"], cm["b"]["y"])
 
     assert np.amin(ret) >= 0.0
     assert np.amax(ret) <= 1.0

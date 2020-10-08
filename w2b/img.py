@@ -104,9 +104,9 @@ def write_ang(name, fs, size, overlapDec, ab, an,
     imgName = util.gen_filename(
             name, fs, size, overlapDec, "an", "bmp", False,
             bins, startFreq, endFreq)
-    rawName = util.gen_filename(
-            name, fs, size, overlapDec, "an", "npy", False,
-            bins, startFreq, endFreq)
+    #rawName = util.gen_filename(
+    #        name, fs, size, overlapDec, "an", "npy", False,
+    #        bins, startFreq, endFreq)
 
     if normAbs:
         ab2 = util.norm(ab)
@@ -118,5 +118,5 @@ def write_ang(name, fs, size, overlapDec, ab, an,
     print("Writing image file \"" + imgName + "\"")
     iio.imwrite(imgName, np.flipud(img))
 
-    print("Writing raw file \"" + rawName + "\"")
-    np.save(rawName, img)
+    #print("Writing raw file \"" + rawName + "\"")
+    #np.save(rawName, img)
